@@ -6,19 +6,34 @@ public class Server {
         int port = 8080;
 
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("Server started on port " + port);
+            System.out.println("Server started on port " + port + " (netology.homework)");
 
-            Socket clientSocket = serverSocket.accept();
-            System.out.println("New connection accepted");
+            while (true) {
+                try (Socket clientSocket = serverSocket.accept();
+                     PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                     BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
 
-            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                    System.out.println("\nNew connection accepted from " + clientSocket.getInetAddress());
 
-            String name = in.readLine();
-            System.out.println("Received: " + name + " from port " + clientSocket.getPort());
+                    out.println("Write your name:");
+                    String name = in.readLine();
+                    System.out.println("Client name: " + name);
 
-            out.println(String.format("Hi %s, your port is %d", name, clientSocket.getPort()));
+                    out.println("Are you child? (yes/no)");
+                    String isChild = in.readLine().toLowerCase();
+                    System.out.println("Is child: " + isChild);
 
+                    if (isChild.equals("yes")) {
+                        out.println("Welcome to the kids area, " + name + "! Let's play!");
+                    } else {
+                        out.println("Welcome to the adult zone, " + name + "! Have a good rest, or a good working day!");
+                    }
+
+
+                } catch (IOException e) {
+                    System.err.println("Error in client handling: " + e.getMessage());
+                }
+            }
         } catch (IOException e) {
             System.err.println("Error in server: " + e.getMessage());
         }
